@@ -1,0 +1,33 @@
+{
+  "buildFiles": [
+    "/Users/dida/Android/MyProject/epic/library/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+      "-C",
+      "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+    "-C",
+    "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "epic-Debug-armeabi-v7a": {
+      "artifactName": "epic",
+      "buildCommandComponents": [
+        "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+        "-C",
+        "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/armeabi-v7a",
+        "epic"
+      ],
+      "abi": "armeabi-v7a",
+      "output": "/Users/dida/Android/MyProject/epic/library/build/intermediates/cmake/debug/obj/armeabi-v7a/libepic.so",
+      "runtimeFiles": []
+    }
+  }
+}

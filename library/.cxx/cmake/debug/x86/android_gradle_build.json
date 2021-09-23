@@ -1,0 +1,40 @@
+{
+  "stringTable": {},
+  "buildFiles": [
+    "/Users/dida/Android/MyProject/epic/library/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+      "-C",
+      "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+    "-C",
+    "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "epic-Debug-x86": {
+      "buildCommandComponents": [
+        "/Users/dida/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja",
+        "-C",
+        "/Users/dida/Android/MyProject/epic/library/.cxx/cmake/debug/x86",
+        "epic"
+      ],
+      "buildType": "debug",
+      "abi": "x86",
+      "artifactName": "epic",
+      "output": "/Users/dida/Android/MyProject/epic/library/build/intermediates/cmake/debug/obj/x86/libepic.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {},
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}
