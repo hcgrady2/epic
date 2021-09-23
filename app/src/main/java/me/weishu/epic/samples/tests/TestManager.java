@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import me.weishu.epic.samples.hook.MyTest;
 import me.weishu.epic.samples.tests.arguments.ArgStatic0;
 import me.weishu.epic.samples.tests.arguments.ArgStatic4;
 import me.weishu.epic.samples.tests.arguments.ArgStatic44;
@@ -91,6 +92,13 @@ public class TestManager {
     }
 
     private void initAllSuites() {
+
+        TestSuite otherDemo = new TestSuite("自己测试");
+        otherDemo.addCase(new MyTest());
+        addSuite(otherDemo);
+
+
+
         TestSuite returnType = new TestSuite("返回值测试");
 
         returnType.addCase(new VoidType());

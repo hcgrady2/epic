@@ -1,6 +1,7 @@
 package me.weishu.epic.samples;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.robv.android.xposed.DexposedBridge;
+import de.robv.android.xposed.XC_MethodHook;
 import me.weishu.epic.samples.tests.TestCase;
 import me.weishu.epic.samples.tests.TestManager;
 import me.weishu.epic.samples.tests.TestSuite;
@@ -26,9 +29,15 @@ public class MainActivity extends Activity {
 
     List<TestSuite> allSuites;
 
+    private  static Context mContext;
+
+    public static Context getmContext(){
+        return  mContext;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         Log.i(TAG, "savedInstance:" + savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Epic Test");
@@ -36,6 +45,28 @@ public class MainActivity extends Activity {
         allSuites = TestManager.getInstance().getAllSuites();
         ExpandableListAdapter adapter = new MyAdapter();
         listView.setAdapter(adapter);
+
+
+        /**
+         * demo
+         */
+        try {
+            DexposedBridge.findAndHookMethod(
+                    Class.forName("com.loc.d"),
+                    "startLocation",
+                    new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            super.beforeHookedMethod(param);
+                            Log.i("hook", Thread.currentThread().getName());
+                            Log.i("hook", Log.getStackTraceString(new Throwable()));
+                        }
+                    }
+            );
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
     }
 

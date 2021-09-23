@@ -3,3 +3,8 @@
 2	954	1632363102	CMakeFiles/epic.dir/art.cpp.o	88846befd1f71243
 0	966	1632363102	CMakeFiles/epic.dir/epic.cpp.o	51ead49f2541995a
 966	1030	1632363102	/Users/dida/Android/MyProject/epic/library/build/intermediates/cmake/debug/obj/arm64-v8a/libepic.so	31afea3d4cfbb375
+0	7	0	clean	248c1ba0126a2dc9
+8	496	1632399480	CMakeFiles/epic.dir/fake_dlfcn.cpp.o	4c983280b18f2b7c
+11	920	1632399480	CMakeFiles/epic.dir/art.cpp.o	88846befd1f71243
+4	940	1632399480	CMakeFiles/epic.dir/epic.cpp.o	51ead49f2541995a
+940	1032	1632399480	/Users/dida/Android/MyProject/epic/library/build/intermediates/cmake/debug/obj/arm64-v8a/libepic.so	31afea3d4cfbb375
