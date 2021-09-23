@@ -47,25 +47,6 @@ public class MainActivity extends Activity {
         listView.setAdapter(adapter);
 
 
-        /**
-         * demo
-         */
-        try {
-            DexposedBridge.findAndHookMethod(
-                    Class.forName("com.loc.d"),
-                    "startLocation",
-                    new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            super.beforeHookedMethod(param);
-                            Log.i("hook", Thread.currentThread().getName());
-                            Log.i("hook", Log.getStackTraceString(new Throwable()));
-                        }
-                    }
-            );
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
 
 
     }
