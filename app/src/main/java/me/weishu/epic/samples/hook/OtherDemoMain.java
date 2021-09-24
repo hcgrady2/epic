@@ -21,11 +21,13 @@ import androidx.core.content.ContextCompat;
 
 import android.os.Looper;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.lang.reflect.Method;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
@@ -118,7 +120,8 @@ public class OtherDemoMain extends Activity {
         btnImsi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                String imsi = getSimOperator(0);
+                Log.i(TAG, "onClick: imsi:" + imsi);
             }
         });
     }
@@ -145,25 +148,67 @@ public class OtherDemoMain extends Activity {
 //                }
 //        );
 //
-//        //hook imsi获取方法
-//        XposedHelpers.findAndHookMethod(
-//                android.telephony.TelephonyManager.class.getName(),
-//                lpparam.classLoader,
-//                "getSubscriberId",
-//                int.class,
-//                new XC_MethodHook() {
-//                    @Override
-//                    protected void beforeHookedMethod(MethodHookParam param) {
-//                      //  XposedBridge.log("调用getSubscriberId获取了imsi");
-//                    }
-//
-//                    @Override
-//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                        XposedBridge.log(getMethodStack());
-//                        super.afterHookedMethod(param);
-//                    }
-//                }
-//        );
+
+
+        DexposedBridge.findAndHookMethod(TelephonyManager.class, "getSubscriberId",new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+                //   Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+                Log.i(TAG, "beforeHookedMethod: getSubscriberId 获取 imei");
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
+
+
+
+
+        DexposedBridge.findAndHookMethod(TelephonyManager.class, "getSimOperator",new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+                //   Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+                Log.i(TAG, "beforeHookedMethod: getSimOperator 获取 imei");
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
+
+
+
+
+        DexposedBridge.findAndHookMethod(TelephonyManager.class, "getSimOperator",new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+                //   Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+                Log.i(TAG, "beforeHookedMethod: getSimOperator 获取 imei");
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
 
 
 
@@ -267,6 +312,154 @@ public class OtherDemoMain extends Activity {
 
 
     }
+
+
+
+
+    /**
+     * 反射获取 getSubscriberId ，既imsi
+     *
+     * @param subId
+     * @return
+     */
+    public  String getSubscriberId(int subId) {
+        TelephonyManager telephonyManager = (TelephonyManager)OtherDemoMain.this.getSystemService(TELEPHONY_SERVICE);// 取得相关系统服务
+        Class<?> telephonyManagerClass = null;
+        String imsi = null;
+        try {
+            telephonyManagerClass = Class.forName("android.telephony.TelephonyManager");
+
+            if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Method method = telephonyManagerClass.getMethod("getSubscriberId", int.class);
+                imsi = (String) method.invoke(telephonyManager, subId);
+            } else if (android.os.Build.VERSION.SDK_INT == android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Method method = telephonyManagerClass.getMethod("getSubscriberId", long.class);
+                imsi = (String) method.invoke(telephonyManager, (long) subId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.i(TAG, "IMSI==" + imsi);
+        return imsi;
+    }
+
+    /**
+     * 反射获取 getSubscriptionId ，既 subid
+     *
+     * @param slotId 卡槽位置（0，1）
+     * @return
+     */
+    public  int getSubscriptionId(int slotId) {
+        try {
+            Method datamethod;
+            int setsubid = -1;//定义要设置为默认数据网络的subid
+            //获取默认数据网络subid   getDefaultDataSubId
+            Class<?> SubscriptionManager = Class.forName("android.telephony.SubscriptionManager");
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) { // >= 24  7.0
+                datamethod = SubscriptionManager.getDeclaredMethod("getDefaultDataSubscriptionId");
+            } else {
+                datamethod = SubscriptionManager.getDeclaredMethod("getDefaultDataSubId");
+            }
+            datamethod.setAccessible(true);
+            int SubId = (int) datamethod.invoke(SubscriptionManager);
+
+
+            Method subManagermethod = SubscriptionManager.getDeclaredMethod("from", Context.class);
+            subManagermethod.setAccessible(true);
+            Object subManager = subManagermethod.invoke(SubscriptionManager, OtherDemoMain.this);
+
+            //getActiveSubscriptionInfoForSimSlotIndex  //获取卡槽0或者卡槽1  可用的subid
+            Method getActivemethod = SubscriptionManager.getDeclaredMethod("getActiveSubscriptionInfoForSimSlotIndex", int.class);
+            getActivemethod.setAccessible(true);
+            Object msubInfo = getActivemethod.invoke(subManager, slotId);  //getSubscriptionId
+
+            Class<?> SubInfo = Class.forName("android.telephony.SubscriptionInfo");
+
+            //slot0   获取卡槽0的subid
+            int subid = -1;
+            if (msubInfo != null) {
+                Method getSubId0 = SubInfo.getMethod("getSubscriptionId");
+                getSubId0.setAccessible(true);
+                subid = (int) getSubId0.invoke(msubInfo);
+            }
+            Log.i(TAG, "slotId=" + slotId + ", subid=" + subid);
+            return subid;
+        } catch (Exception e) {
+            Log.e(TAG, e.getLocalizedMessage());
+        }
+        return -1;
+    }
+
+    /**
+     * 获取运营商 IMSI
+     * 默认为 IMEI1对应的 IMSI
+     *
+     * @return
+     */
+    public  String getSimOperator() {
+        TelephonyManager telephonyManager = (TelephonyManager) OtherDemoMain.this.getSystemService(TELEPHONY_SERVICE);// 取得相关系统服务
+        return telephonyManager.getSimOperator();
+    }
+
+    /**
+     * 根据卡槽位置 获取运营商 IMSI
+     *
+     * @param slotId 卡槽位置（0，1）
+     * @return
+     */
+    public  String getSimOperator(int slotId) {
+        int subid = getSubscriptionId(slotId);
+        if (subid == -1) {
+            return null;
+        }
+
+        String imsi = getSubscriberId(subid);
+        if (!TextUtils.isEmpty(imsi)) {
+            return imsi;
+        }
+
+        return null;
+    }
+
+    /**
+     * 通过卡槽位置拿 IMEI
+     *
+     * @param slotId (0, 1卡槽位置）
+     * @return
+     */
+    public  String getImei(int slotId) {
+        if (slotId != 0 && slotId != 1) {
+            return null;
+        }
+
+        TelephonyManager tm = (TelephonyManager) OtherDemoMain.this.getSystemService(TELEPHONY_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            return tm.getDeviceId(slotId);
+
+        } else if (slotId == 0){
+            return tm.getDeviceId();
+
+        } else {
+            TelephonyManager telephonyManager = (TelephonyManager) OtherDemoMain.this.getSystemService(TELEPHONY_SERVICE);// 取得相关系统服务
+            Class<?> telephonyManagerClass = null;
+            String imei = null;
+
+            try {
+                telephonyManagerClass = Class.forName("android.telephony.TelephonyManager");
+                Method method = telephonyManagerClass.getMethod("getImei", int.class);
+                imei = (String) method.invoke(telephonyManager, slotId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Log.i(TAG, "imei==" + imei);
+
+            return imei;
+        }
+    }
+
+
 
     /**
      * 获取 imei
