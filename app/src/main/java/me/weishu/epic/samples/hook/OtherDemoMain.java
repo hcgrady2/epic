@@ -3,6 +3,7 @@ package me.weishu.epic.samples.hook;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.os.Looper;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -76,6 +78,7 @@ public class OtherDemoMain extends Activity {
 
 
     Button btnLocation,btnGetMac;
+    Button btnImei,btnImsi;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +103,24 @@ public class OtherDemoMain extends Activity {
             }
         });
         
-        
+
+        btnImei = findViewById(R.id.btn_read_phone);
+        btnImsi = findViewById(R.id.btn_imsi);
+
+        btnImei.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String imei = getIMEI(OtherDemoMain.this);
+                Log.i(TAG, "onClick: imei:"  + imei);
+            }
+        });
+
+        btnImsi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 
     private void initHook() {
@@ -144,6 +164,51 @@ public class OtherDemoMain extends Activity {
 //                    }
 //                }
 //        );
+
+
+
+
+        DexposedBridge.findAndHookMethod(TelephonyManager.class, "getImei",new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+             //   Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+                Log.i(TAG, "beforeHookedMethod: getImei");
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
+
+
+        DexposedBridge.findAndHookMethod(TelephonyManager.class, "getDeviceId",new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+               // Log.i(TAG, Log.getStackTraceString(new Throwable()));
+                Log.i(TAG, "beforeHookedMethod: getDeviceId");
+
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
+
+
+
+
+        ///todo,
 //        //hook低版本系统获取mac地方方法
 //        XposedHelpers.findAndHookMethod(
 //                android.net.wifi.WifiInfo.class.getName(),
@@ -202,6 +267,22 @@ public class OtherDemoMain extends Activity {
 
 
     }
+
+    /**
+     * 获取 imei
+     * @param context
+     * @return
+     */
+    private String getIMEI(Context context) {
+        TelephonyManager tm = (TelephonyManager) context.getSystemService(Service.TELEPHONY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return tm.getImei();
+        } else {
+            return tm.getDeviceId();
+        }
+    }
+
+
 
 
     /**

@@ -35,7 +35,8 @@ public class MainActivity extends Activity implements EasyPermissions.Permission
 
     private  static Context mContext;
 
-    private static final String[] LOCATION_AND_CONTACTS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE};
+    private static final String[] LOCATION_AND_CONTACTS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE,
+            "android.permission.READ_PRIVILEGED_PHONE_STATE"};
 
     private static final int RC_CAMERA_PERM = 123;
     private static final int RC_LOCATION_CONTACTS_PERM = 124;
