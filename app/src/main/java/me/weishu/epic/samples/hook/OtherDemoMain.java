@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,7 +75,7 @@ public class OtherDemoMain extends Activity {
     };
 
 
-    Button btnLocation;
+    Button btnLocation,btnGetMac;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +87,16 @@ public class OtherDemoMain extends Activity {
             @Override
             public void onClick(View view) {
                 getLocation();
+            }
+        });
+
+        btnGetMac = findViewById(R.id.btn_mac);
+        btnGetMac.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String mac = getMacAddress();
+
+                Log.i(TAG, "onClick:  mac :" + mac);
             }
         });
         
@@ -150,57 +162,16 @@ public class OtherDemoMain extends Activity {
 //                    }
 //                }
 //        );
-//        //hook获取mac地址方法
-//        XposedHelpers.findAndHookMethod(
-//                java.net.NetworkInterface.class.getName(),
-//                lpparam.classLoader,
-//                "getHardwareAddress",
-//                new XC_MethodHook() {
-//                    @Override
-//                    protected void beforeHookedMethod(MethodHookParam param) {
-//                     //   XposedBridge.log("调用getHardwareAddress()获取了mac地址");
-//                    }
-//
-//                    @Override
-//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                        XposedBridge.log(getMethodStack());
-//                        super.afterHookedMethod(param);
-//                    }
-//                }
-//        );
 
 
 
-//        try {
-//            DexposedBridge.findAndHookMethod(
-//                    Class.forName("com.loc.d"),
-//                    "startLocation",
-//                    new XC_MethodHook() {
-//                        @Override
-//                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                            super.beforeHookedMethod(param);
-//                            Log.i("hook", Thread.currentThread().getName());
-//                            Log.i("hook", Log.getStackTraceString(new Throwable()));
-//                        }
-//                    }
-//            );
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
-        Log.i(TAG, "initHook: ");
-
-
-
-// Target class, method with parameter types, followed by the hook callback (XC_MethodHook).
-        DexposedBridge.findAndHookMethod(LocationManager.class, "getLastKnownLocation", String.class, new XC_MethodHook() {
+        DexposedBridge.findAndHookMethod(NetworkInterface.class, "getHardwareAddress",new XC_MethodHook() {
 
             // To be invoked before Activity.onCreate().
             @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
-                Log.i(TAG, Thread.currentThread().getName());
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
                 Log.i(TAG, Log.getStackTraceString(new Throwable()));
-
 
             }
 
@@ -211,12 +182,85 @@ public class OtherDemoMain extends Activity {
         });
 
 
+        // Target class, method with parameter types, followed by the hook callback (XC_MethodHook).
+        DexposedBridge.findAndHookMethod(LocationManager.class, "getLastKnownLocation", String.class, new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                //打印了堆栈，在这里处理是否违规获取权限，是否同意之前，是否后台，频率是否超限等。
+               Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+            }
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
+
+
+
+    }
+
+
+    /**
+     * 获取 mac 地址
+     */
+    public  String getMacAddress() {
+        String macAddr = "";
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            Log.d("HookTag","6.0及以上、7.0以下");
+            macAddr = MacUtils.getMacAddress(OtherDemoMain.this);
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            Log.d("HookTag","7.0及以上");
+            macAddr = MacUtils.getMachineHardwareAddress();
+        }else{
+            Log.d("HookTag","6.0以下");
+            macAddr = MacUtils.getMacAddress0(OtherDemoMain.this);
+        }
+        Log.d("HookTag",macAddr);
+        return macAddr;
+    }
+    /**
+     * 遍历循环所有的网络接口，找到接口是 wlan0
+     * 必须的权限 <uses-permission android:name="android.permission.INTERNET" />
+     * @return
+     */
+    private  String getMacFromHardware() {
+        Log.i(TAG, "getMacFromHardware: 获取 mac 地址");
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:", b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "02:00:00:00:00:00";
     }
 
 
 
 
-
+    /**
+     * 获取定位
+     */
     private void getLocation(){
         //1.获取位置管理器
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
