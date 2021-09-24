@@ -1,5 +1,6 @@
 package me.weishu.epic.samples;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -20,8 +21,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import me.weishu.epic.samples.tests.TestCase;
 import me.weishu.epic.samples.tests.TestManager;
 import me.weishu.epic.samples.tests.TestSuite;
+import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements EasyPermissions.PermissionCallbacks {
 
     private static final String TAG = "MainActivity";
 
@@ -30,6 +32,12 @@ public class MainActivity extends Activity {
     List<TestSuite> allSuites;
 
     private  static Context mContext;
+
+    private static final String[] LOCATION_AND_CONTACTS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE};
+
+    private static final int RC_CAMERA_PERM = 123;
+    private static final int RC_LOCATION_CONTACTS_PERM = 124;
+
 
     public static Context getmContext(){
         return  mContext;
@@ -46,10 +54,37 @@ public class MainActivity extends Activity {
         ExpandableListAdapter adapter = new MyAdapter();
         listView.setAdapter(adapter);
 
-
+        // Ask for both permissions
+        EasyPermissions.requestPermissions(
+                this,
+                "给我定位权限，🙏",
+                RC_LOCATION_CONTACTS_PERM,
+                LOCATION_AND_CONTACTS);
 
 
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Some permissions have been granted
+        // ...
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Some permissions have been denied
+        // ...
+    }
+
+
 
     private class MyAdapter extends BaseExpandableListAdapter {
 

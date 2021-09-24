@@ -8,7 +8,8 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        //  testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             ndkBuild {
                 abiFilters "armeabi-v7a", "x86"
@@ -37,4 +38,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(":library")
     implementation 'com.qmuiteam:qmui:1.0.4'
+    implementation 'pub.devrel:easypermissions:3.0.0'
+
+
 }
