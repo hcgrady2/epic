@@ -3,6 +3,7 @@ package me.weishu.epic.samples;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import de.robv.android.xposed.DexposedBridge;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
 import me.weishu.epic.samples.tests.TestCase;
 import me.weishu.epic.samples.tests.TestManager;
 import me.weishu.epic.samples.tests.TestSuite;
@@ -60,6 +62,35 @@ public class MainActivity extends Activity implements EasyPermissions.Permission
                 "给我定位权限，🙏",
                 RC_LOCATION_CONTACTS_PERM,
                 LOCATION_AND_CONTACTS);
+
+
+
+// Target class, method with parameter types, followed by the hook callback (XC_MethodHook).
+//        DexposedBridge.findAndHookMethod(Activity.class, "onCreate", Bundle.class, new XC_MethodHook() {
+//
+//            // To be invoked before Activity.onCreate().
+//            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                // "thisObject" keeps the reference to the instance of target class.
+//                Activity instance = (Activity) param.thisObject;
+//
+//                // The array args include all the parameters.
+//                Bundle bundle = (Bundle) param.args[0];
+//                Intent intent = new Intent();
+//                // XposedHelpers provide useful utility methods.
+//                XposedHelpers.setObjectField(param.thisObject, "mIntent", intent);
+//
+//                Log.i("hook", Thread.currentThread().getName());
+//                Log.i("hook", Log.getStackTraceString(new Throwable()));
+//
+//
+//            }
+//
+//            // To be invoked after Activity.onCreate()
+//            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+//            }
+//        });
+
 
 
     }

@@ -2,7 +2,9 @@ package me.weishu.epic.samples.hook;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -16,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +29,7 @@ import java.util.Locale;
 
 import de.robv.android.xposed.DexposedBridge;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
 import me.weishu.epic.samples.R;
 
 
@@ -184,43 +188,28 @@ public class OtherDemoMain extends Activity {
 //            e.printStackTrace();
 //        }
 
-        try {
-            DexposedBridge.findAndHookMethod(
-                    Class.forName("com.loc.d"),
-                    "startLocation",
-                    new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            super.beforeHookedMethod(param);
-                            Log.i(TAG, Thread.currentThread().getName());
-                            Log.i(TAG, Log.getStackTraceString(new Throwable()));
-                        }
-                    }
-            );
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        Log.i(TAG, "initHook: ");
 
 
-        //hook定位方法
-//        XposedHelpers.findAndHookMethod(
-//                LocationManager.class.getName(),
-//                lpparam.classLoader,
-//                "getLastKnownLocation",
-//                String.class,
-//                new XC_MethodHook() {
-//                    @Override
-//                    protected void beforeHookedMethod(MethodHookParam param) {
-//                        XposedBridge.log("调用getLastKnownLocation获取了GPS地址");
-//                    }
-//
-//                    @Override
-//                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                        XposedBridge.log(getMethodStack());
-//                        super.afterHookedMethod(param);
-//                    }
-//                }
-//        );
+
+// Target class, method with parameter types, followed by the hook callback (XC_MethodHook).
+        DexposedBridge.findAndHookMethod(LocationManager.class, "getLastKnownLocation", String.class, new XC_MethodHook() {
+
+            // To be invoked before Activity.onCreate().
+            @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                Log.i(TAG, Thread.currentThread().getName());
+                Log.i(TAG, Log.getStackTraceString(new Throwable()));
+
+
+            }
+
+            // To be invoked after Activity.onCreate()
+            @Override protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                XposedHelpers.callMethod(param.thisObject, "sampleMethod", 2);
+            }
+        });
+
 
     }
 
